@@ -1,0 +1,35 @@
+# Use an official Python runtime as a parent image
+FROM python:3.12-bookworm
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+# Define the environment variable for project name
+ENV PROJECT_NAME=your_project_name
+
+# Set work directory
+WORKDIR /code
+
+# Install system dependencies
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends gcc libpq-dev \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt /code/
+RUN pip install --upgrade pip \
+  && pip install -r requirements.txt
+
+# Copy project
+COPY . /code/
+
+# Collect static files
+RUN python manage.py collectstatic --no-input
+
+# Use ENTRYPOINT to define the executable and CMD to pass default arguments to the executable
+# Assuming the rest of your Dockerfile is set up properly
+COPY ./scripts/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+
