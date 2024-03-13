@@ -1,8 +1,11 @@
 from django.db import models
 import uuid
+from .tag_model import Tag
 from .rule_model import Rule
 from .template_model import Template
 from .instruction_model import Instruction
+from django.utils.text import slugify
+
 
 class Prompt(models.Model):
     """
@@ -13,7 +16,7 @@ class Prompt(models.Model):
         uuid (UUIDField): A unique identifier for each prompt instance.
         name (CharField): A human-readable name for the prompt.
         rules (ManyToManyField): A collection of rules associated with the prompt.
-        output_type (CharField): The type of output expected from the prompt, such as code, image, or free text.
+        output_format (CharField): The format of output expected from the prompt, such as code, image, or free text.
         template (ForeignKey): A reference to a template that defines the structure or format of the prompt's output.
         instructions (ManyToManyField): A collection of instructions related to the prompt.
         created_at (DateTimeField): The date and time when the prompt instance was created.
@@ -34,7 +37,7 @@ class Prompt(models.Model):
         IMAGE = 'image', 'Image'
         IMAGE_SEQUENCE = 'image_sequence', 'Image Sequence'
         INTERACTIVE = 'interactive', 'Interactive'
-        JSON = 'json', 'JSON'
+        JSON = 'JSON', 'JSON'
         LINK = 'link', 'Link'
         LIST = 'list', 'List'
         MAP = 'map', 'Map'
@@ -44,19 +47,20 @@ class Prompt(models.Model):
         SCORE = 'score', 'Score'
         TABLE = 'table', 'Table'
         VIDEO = 'video', 'Video'
-        XML = 'xml', 'XML'
-        YAML = 'yaml', 'YAML'
+        XML = 'XML', 'XML'
+        YAML = 'YAML', 'YAML'
     # You can continue to add more types as needed
 
 
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True, blank=True)
-    description = models.TextField()    
+    description = models.TextField()
+    tags = models.ManyToManyField(Tag, related_name='prompts', blank=True)
     content = models.CharField(max_length=255)               
     rules = models.ManyToManyField(Rule, related_name='prompts')
-    output_type = models.CharField(max_length=50, choices=OutputType.choices)
-    template = models.ForeignKey(Template, on_delete=models.CASCADE)
+    output_format = models.CharField(max_length=50, choices=OutputType.choices)
+    template = models.ForeignKey(Template, on_delete=models.CASCADE, blank=True, null=True)
     instructions = models.ManyToManyField(Instruction, related_name='prompts')
     created_at = models.DateTimeField(auto_now_add=True)
     change_log = models.TextField()
@@ -65,3 +69,18 @@ class Prompt(models.Model):
     def __str__(self):
         """Returns the human-readable name of the prompt."""
         return self.name
+
+
+    def save(self, *args, **kwargs):
+        """
+        Overrides the save method to automatically generate a slug from the rule's name
+        if a slug is not explicitly provided. This ensures uniqueness and URL-friendliness
+        of the slug field.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+        """
+        if not self.slug:
+            self.slug = slugify(self.name)  # Automatically generate slug from name
+        super().save(*args, **kwargs)

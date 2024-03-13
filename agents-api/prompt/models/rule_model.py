@@ -23,6 +23,7 @@ class Rule(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True, blank=True)
     description = models.TextField()
+    tags = models.ManyToManyField('prompt.Tag', related_name='rules', blank=True)
     content = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
 

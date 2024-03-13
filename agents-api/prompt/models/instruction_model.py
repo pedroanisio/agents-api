@@ -2,6 +2,7 @@ from django.db import models
 import uuid
 from django.utils.text import slugify
 
+
 class Instruction(models.Model):
     """
     Represents an instruction entity in the application.
@@ -23,6 +24,7 @@ class Instruction(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True, blank=True)    
     description = models.TextField()
+    tags = models.ManyToManyField('prompt.Tag', related_name='instructions', blank=True)
     content = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
 
