@@ -17,7 +17,7 @@ services:
       - media_volume:/path/to/media
 
   nginx:
-    image: nginx:latest
+    image: nginx:1.25-bookworm
     ports:
       - "80:80"
     volumes:

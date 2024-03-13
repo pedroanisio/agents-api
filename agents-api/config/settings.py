@@ -25,12 +25,22 @@ SECRET_KEY = 'django-insecure-4gn+%0$-i5vfgt8$52*i#is3i9(n!mb4e6b*f!ot$euhje!adc
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['10.10.10.30']
 
+## DJANGO REST FRAMEWORK SETTINGS
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
 
 # Application definition
 
 INSTALLED_APPS = [
+    "prompt.apps.PromptConfig",
+    'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -49,7 +59,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'agents.urls'
+ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
     {
@@ -73,12 +83,19 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# config/settings.py
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'app-db',  # Match to your Docker Compose POSTGRES_DB
+        'USER': 'app-user',  # Match to your Docker Compose POSTGRES_USER
+        'PASSWORD': 'app-password',  # Match to your Docker Compose POSTGRES_PASSWORD
+        'HOST': 'db',  # Name of the service in Docker Compose
+        'PORT': '5432',  # Default PostgreSQL port
     }
 }
+
 
 
 # Password validation
